@@ -207,7 +207,7 @@ class ChatApp {
         
         this.profileData = {
             aiName: document.getElementById('editProfileName').value.trim() || 'Asman',
-            userName: document.getElementById('editUserName').value.trim() || 'Rezky',
+            userName: document.getElementById('editUserName').value.trim() || 'you',
             aiImage: newAiImage,
             userImage: newUserImage,
             introduction: document.getElementById('editIntroductionText').value.trim() || this.profileData.introduction
