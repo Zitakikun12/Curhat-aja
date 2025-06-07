@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asman Kekasih Rezky</title>
+    <link rel="stylesheet" href="1.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="Asman.jpg" alt="Asman Profile" class="profile-image">
+            <div>💕 Asman Kekasihku 💕</div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+            <textarea id="userInput" rows="2" placeholder="Mau ngomongin apa?"></textarea>
+            <div class="input-buttons">
+                <button id="submitBtn">kirim</button>
+                <button id="voiceBtn">🎤</button>
+                <button id="clearHistoryBtn">️hapus pesan</button>
+                <button id="editProfileBtn">edit profil</button>
+            </div>
+            <div class="photo-gallery" id="photoGallery">
+                <img src="1.jpg" alt="Stiker 1" class="photo-thumbnail" data-photo="1">
+                <img src="2.jpg" alt="Stiker 2" class="photo-thumbnail" data-photo="2">
+                <img src="3.jpg" alt="Stiker 3" class="photo-thumbnail" data-photo="3">
+                <img src="4.jpg" alt="Stiker 4" class="photo-thumbnail" data-photo="4">
+                <img src="5.jpg" alt="Stiker 5" class="photo-thumbnail" data-photo="5">
+                <img src="6.jpg" alt="Stiker 6" class="photo-thumbnail" data-photo="6">
+                <img src="7.jpg" alt="Stiker 7" class="photo-thumbnail" data-photo="7">
+                <img src="8.jpg" alt="Stiker 8" class="photo-thumbnail" data-photo="8">
+                <img src="9.jpg" alt="Stiker 9" class="photo-thumbnail" data-photo="9">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="profileEditModal">
+        <div class="modal-content">
+            <div class="modal-scroll-container">
+                <h3>Edit Profil</h3>
+                
+                <div class="form-group">
+                    <label for="editProfileName">Nama Karakter (Asman)</label>
+                    <input type="text" id="editProfileName" placeholder="Nama karakter">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editUserName">Namamu (Rezky)</label>
+                    <input type="text" id="editUserName" placeholder="Nama pengguna">
+                </div>
+                
+                <div class="form-group">
+                    <label>Gambar Profil Asman</label>
+                    <div class="image-upload-container">
+                        <img id="aiImagePreview" src="Asman.jpg" class="image-preview">
+                        <input type="file" id="editProfileImage" accept="image/*" class="hidden-file-input">
+                        <button class="image-upload-btn" onclick="document.getElementById('editProfileImage').click()">Pilih Gambar</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Gambar Profil Rezky</label>
+                    <div class="image-upload-container">
+                        <img id="userImagePreview" src="rezky.jpg" class="image-preview">
+                        <input type="file" id="editUserImage" accept="image/*" class="hidden-file-input">
+                        <button class="image-upload-btn" onclick="document.getElementById('editUserImage').click()">Pilih Gambar</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editIntroductionText">Teks Perkenalan</label>
+                    <textarea id="editIntroductionText" rows="6" placeholder="Masukkan teks perkenalan baru"></textarea>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="saveProfileBtn">Simpan</button>
+                <button id="cancelProfileEditBtn">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="1.js"></script>
+</body>
+</html>
