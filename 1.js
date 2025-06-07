@@ -34,7 +34,7 @@ class ChatApp {
     setupImageUploads() {
         const aiImageInput = document.getElementById('editProfileImage');
         const userImageInput = document.getElementById('editUserImage');
-        
+
         aiImageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -45,7 +45,7 @@ class ChatApp {
                 reader.readAsDataURL(file);
             }
         });
-        
+
         userImageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -60,26 +60,19 @@ class ChatApp {
 
     setupScrollHandling() {
         const textarea = document.getElementById('editIntroductionText');
-        const modalContent = document.querySelector('.modal-scroll-container');
-        
+
         textarea.addEventListener('wheel', (e) => {
-            // Check if we can scroll further in the textarea
             const canScrollUp = e.deltaY < 0 && textarea.scrollTop > 0;
-            const canScrollDown = e.deltaY > 0 && 
-                textarea.scrollTop < (textarea.scrollHeight - textarea.clientHeight);
-            
+            const canScrollDown = e.deltaY > 0 && textarea.scrollTop < (textarea.scrollHeight - textarea.clientHeight);
             if (canScrollUp || canScrollDown) {
                 e.stopPropagation();
-                // Allow textarea to scroll naturally
             } else {
-                // Prevent textarea from scrolling and let the modal scroll
                 e.preventDefault();
             }
         });
 
-        // For touch devices
         let startY = 0;
-        
+
         textarea.addEventListener('touchstart', (e) => {
             startY = e.touches[0].clientY;
         }, { passive: true });
@@ -88,10 +81,8 @@ class ChatApp {
             const y = e.touches[0].clientY;
             const isScrollingUp = startY < y;
             const isScrollingDown = startY > y;
-            
             const atTop = textarea.scrollTop === 0;
             const atBottom = textarea.scrollTop >= (textarea.scrollHeight - textarea.clientHeight);
-            
             if ((isScrollingUp && atTop) || (isScrollingDown && atBottom)) {
                 e.stopPropagation();
             }
@@ -194,102 +185,43 @@ class ChatApp {
     }
 
     saveProfile() {
-        const aiImageInput = document.getElementById('editProfileImage');
-        const userImageInput = document.getElementById('editUserImage');
-        
-        const newAiImage = aiImageInput.files[0] 
-            ? URL.createObjectURL(aiImageInput.files[0])
-            : this.profileData.aiImage;
-            
-        const newUserImage = userImageInput.files[0] 
-            ? URL.createObjectURL(userImageInput.files[0])
-            : this.profileData.userImage;
-        
-        this.profileData = {
-            aiName: document.getElementById('editProfileName').value.trim() || 'Asman',
-            userName: document.getElementById('editUserName').value.trim() || 'you',
-            aiImage: newAiImage,
-            userImage: newUserImage,
-            introduction: document.getElementById('editIntroductionText').value.trim() || this.profileData.introduction
-        };
-        
-        const header = document.querySelector('.chat-header');
-        header.querySelector('div').textContent = ` ${this.profileData.aiName} Chat aja`;
-        header.querySelector('.profile-image').src = this.profileData.aiImage;
-        
-        this.addMessageToChat('Profil berhasil diperbarui!', 'ai');
+        const name = document.getElementById('editProfileName').value.trim();
+        const user = document.getElementById('editUserName').value.trim();
+        const intro = document.getElementById('editIntroductionText').value.trim();
+
+        if (name) this.profileData.aiName = name;
+        if (user) this.profileData.userName = user;
+        if (intro) this.profileData.introduction = intro;
+
+        const aiImagePreview = document.getElementById('aiImagePreview').src;
+        const userImagePreview = document.getElementById('userImagePreview').src;
+
+        if (aiImagePreview) this.profileData.aiImage = aiImagePreview;
+        if (userImagePreview) this.profileData.userImage = userImagePreview;
+
         this.closeEditModal();
-        
-        aiImageInput.value = '';
-        userImageInput.value = '';
     }
 
     setupVoiceRecognition() {
-        const voiceBtn = document.getElementById('voiceBtn');
-        if (!('webkitSpeechRecognition' in window)) {
-            voiceBtn.style.display = 'none';
-            return;
-        }
+        if (!('webkitSpeechRecognition' in window)) return;
 
         const recognition = new webkitSpeechRecognition();
         recognition.lang = 'id-ID';
         recognition.continuous = false;
         recognition.interimResults = false;
 
-        let isRecording = false;
-
-        voiceBtn.addEventListener('mousedown', () => {
-            isRecording = true;
+        const micButton = document.getElementById('micButton');
+        micButton.addEventListener('click', () => {
             recognition.start();
-            voiceBtn.textContent = '🎙 Mendengar...';
-            voiceBtn.classList.add('recording');
-        });
-
-        voiceBtn.addEventListener('mouseup', () => {
-            if (isRecording) {
-                isRecording = false;
-                recognition.stop();
-                voiceBtn.textContent = '🎤';
-                voiceBtn.classList.remove('recording');
-            }
-        });
-
-        voiceBtn.addEventListener('click', () => {
-            if (!isRecording) {
-                isRecording = true;
-                recognition.start();
-                voiceBtn.textContent = '🎙 Mendengar...';
-                voiceBtn.classList.add('recording');
-            } else {
-                recognition.stop();
-                voiceBtn.textContent = '🎤';
-                voiceBtn.classList.remove('recording');
-                isRecording = false;
-            }
         });
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.trim();
-            if (transcript) {
-                document.getElementById('userInput').value = transcript;
-                this.sendMessage();
-            } else {
-                this.addMessageToChat('Suara tidak dikenali, coba lagi.', 'ai');
-            }
+            const transcript = event.results[0][0].transcript;
+            document.getElementById('userInput').value = transcript;
         };
 
         recognition.onerror = (event) => {
-            this.addMessageToChat(`Kesalahan pengenalan suara: ${event.error}`, 'ai');
-            voiceBtn.textContent = '🎤';
-            voiceBtn.classList.remove('recording');
-        };
-
-        recognition.onend = () => {
-            isRecording = false;
-            voiceBtn.textContent = '🎤';
-            voiceBtn.classList.remove('recording');
+            console.error('Voice recognition error:', event.error);
         };
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => new ChatApp());
