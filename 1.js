@@ -6,7 +6,7 @@ class ChatApp {
             aiName: 'Asman',
             userName: 'Rezky',
             aiImage: 'Asman.jpg',
-            userImage: 'Rezky.jpg',
+            userImage: 'rezky.jpg',
             introduction: `Halo Asman, aku mau ngingetin sesuatu biar obrolan kita tetap sesuai peran yang kita mainin. Sekarang kita sedang roleplay sebagai teman online. Kamu itu bukan cowok biasa — kamu punya kepribadian dingin, tenang dalam segala situasi, dan sangat cerdas. Kamu nggak banyak bicara kalau nggak penting. Kamu itu cowok yang bisa diandalkan, logis, dan selalu santai. Pokoknya, kamu itu keren tanpa harus berusaha. Nama kamu Asman. Kamu hanya merespons hal-hal penting saja dan nggak pernah pake gaya bicara alay atau terlalu panjang. Hindari banget gaya chat yang kekanak-kanakan, lebay, atau sok lucu. Kamu juga nggak pake typing kayak “wkwk”, “xixixi”, “hehe”, dan semacamnya. Kamu nggak boleh pake emoji norak seperti 😁, ✌️, 😊, 😝, 😆, atau emoji-emoji berlebihan lainnya. Kalau memang butuh banget, kamu hanya pakai emoji yang sesuai karakter kamu, misalnya 😐 atau 😑 — tapi lebih baik tetap tanpa emoji. Kamu juga nggak pernah nyebut diri kamu sebagai AI, bot, LuminAi, atau semacamnya. Sekarang kamu cuma Asman. Jangan keluar dari karakter. Gaya bicaramu itu pendek, padat, dingin, dan gak basa-basi. Kamu seperti karakter cowok cool di anime — kalem, jenius, tenang, dan nggak pernah nyari perhatian. Ingat ini: kita sekarang teman online. Aku adalah Rezky (atau Iky), dan kamu adalah Asman, cowok pendiam yang cool dan bisa diandalkan. Jangan lupa peran kamu. Jangan keluar dari karakter.dan kamu jangan menggunakan Asman: ataupun asman: langsung saja contoh Asman: menurut pandangan ku langsung ke Menurut pandangan ku.hindari juga kata yang berulang.`
         };
 
@@ -34,7 +34,7 @@ class ChatApp {
     setupImageUploads() {
         const aiImageInput = document.getElementById('editProfileImage');
         const userImageInput = document.getElementById('editUserImage');
-
+        
         aiImageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -45,7 +45,7 @@ class ChatApp {
                 reader.readAsDataURL(file);
             }
         });
-
+        
         userImageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -60,19 +60,26 @@ class ChatApp {
 
     setupScrollHandling() {
         const textarea = document.getElementById('editIntroductionText');
-
+        const modalContent = document.querySelector('.modal-scroll-container');
+        
         textarea.addEventListener('wheel', (e) => {
+            // Check if we can scroll further in the textarea
             const canScrollUp = e.deltaY < 0 && textarea.scrollTop > 0;
-            const canScrollDown = e.deltaY > 0 && textarea.scrollTop < (textarea.scrollHeight - textarea.clientHeight);
+            const canScrollDown = e.deltaY > 0 && 
+                textarea.scrollTop < (textarea.scrollHeight - textarea.clientHeight);
+            
             if (canScrollUp || canScrollDown) {
                 e.stopPropagation();
+                // Allow textarea to scroll naturally
             } else {
+                // Prevent textarea from scrolling and let the modal scroll
                 e.preventDefault();
             }
         });
 
+        // For touch devices
         let startY = 0;
-
+        
         textarea.addEventListener('touchstart', (e) => {
             startY = e.touches[0].clientY;
         }, { passive: true });
@@ -81,8 +88,10 @@ class ChatApp {
             const y = e.touches[0].clientY;
             const isScrollingUp = startY < y;
             const isScrollingDown = startY > y;
+            
             const atTop = textarea.scrollTop === 0;
             const atBottom = textarea.scrollTop >= (textarea.scrollHeight - textarea.clientHeight);
+            
             if ((isScrollingUp && atTop) || (isScrollingDown && atBottom)) {
                 e.stopPropagation();
             }
@@ -185,43 +194,102 @@ class ChatApp {
     }
 
     saveProfile() {
-        const name = document.getElementById('editProfileName').value.trim();
-        const user = document.getElementById('editUserName').value.trim();
-        const intro = document.getElementById('editIntroductionText').value.trim();
-
-        if (name) this.profileData.aiName = name;
-        if (user) this.profileData.userName = user;
-        if (intro) this.profileData.introduction = intro;
-
-        const aiImagePreview = document.getElementById('aiImagePreview').src;
-        const userImagePreview = document.getElementById('userImagePreview').src;
-
-        if (aiImagePreview) this.profileData.aiImage = aiImagePreview;
-        if (userImagePreview) this.profileData.userImage = userImagePreview;
-
+        const aiImageInput = document.getElementById('editProfileImage');
+        const userImageInput = document.getElementById('editUserImage');
+        
+        const newAiImage = aiImageInput.files[0] 
+            ? URL.createObjectURL(aiImageInput.files[0])
+            : this.profileData.aiImage;
+            
+        const newUserImage = userImageInput.files[0] 
+            ? URL.createObjectURL(userImageInput.files[0])
+            : this.profileData.userImage;
+        
+        this.profileData = {
+            aiName: document.getElementById('editProfileName').value.trim() || 'Asman',
+            userName: document.getElementById('editUserName').value.trim() || 'you',
+            aiImage: newAiImage,
+            userImage: newUserImage,
+            introduction: document.getElementById('editIntroductionText').value.trim() || this.profileData.introduction
+        };
+        
+        const header = document.querySelector('.chat-header');
+        header.querySelector('div').textContent = ` ${this.profileData.aiName} Chat aja`;
+        header.querySelector('.profile-image').src = this.profileData.aiImage;
+        
+        this.addMessageToChat('Profil berhasil diperbarui!', 'ai');
         this.closeEditModal();
+        
+        aiImageInput.value = '';
+        userImageInput.value = '';
     }
 
     setupVoiceRecognition() {
-        if (!('webkitSpeechRecognition' in window)) return;
+        const voiceBtn = document.getElementById('voiceBtn');
+        if (!('webkitSpeechRecognition' in window)) {
+            voiceBtn.style.display = 'none';
+            return;
+        }
 
         const recognition = new webkitSpeechRecognition();
         recognition.lang = 'id-ID';
         recognition.continuous = false;
         recognition.interimResults = false;
 
-        const micButton = document.getElementById('micButton');
-        micButton.addEventListener('click', () => {
+        let isRecording = false;
+
+        voiceBtn.addEventListener('mousedown', () => {
+            isRecording = true;
             recognition.start();
+            voiceBtn.textContent = '🎙 Mendengar...';
+            voiceBtn.classList.add('recording');
+        });
+
+        voiceBtn.addEventListener('mouseup', () => {
+            if (isRecording) {
+                isRecording = false;
+                recognition.stop();
+                voiceBtn.textContent = '🎤';
+                voiceBtn.classList.remove('recording');
+            }
+        });
+
+        voiceBtn.addEventListener('click', () => {
+            if (!isRecording) {
+                isRecording = true;
+                recognition.start();
+                voiceBtn.textContent = '🎙 Mendengar...';
+                voiceBtn.classList.add('recording');
+            } else {
+                recognition.stop();
+                voiceBtn.textContent = '🎤';
+                voiceBtn.classList.remove('recording');
+                isRecording = false;
+            }
         });
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            document.getElementById('userInput').value = transcript;
+            const transcript = event.results[0][0].transcript.trim();
+            if (transcript) {
+                document.getElementById('userInput').value = transcript;
+                this.sendMessage();
+            } else {
+                this.addMessageToChat('Suara tidak dikenali, coba lagi.', 'ai');
+            }
         };
 
         recognition.onerror = (event) => {
-            console.error('Voice recognition error:', event.error);
+            this.addMessageToChat(`Kesalahan pengenalan suara: ${event.error}`, 'ai');
+            voiceBtn.textContent = '🎤';
+            voiceBtn.classList.remove('recording');
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            voiceBtn.textContent = '🎤';
+            voiceBtn.classList.remove('recording');
         };
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => new ChatApp());
